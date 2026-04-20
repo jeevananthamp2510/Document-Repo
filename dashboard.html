@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Document Repository{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Page header ── */
+.page-top {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  margin-bottom:2.5rem; animation:fadeUp 0.5s ease both;
+}
+.page-top-left {}
+.page-eyebrow {
+  font-size:0.7rem; font-weight:500; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:0.4rem;
+}
+.page-top h2 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.8rem,4vw,2.5rem); font-weight:700; color:var(--ink);
+}
+.page-top h2 em { font-style:italic; color:var(--accent); }
+.page-line { width:36px; height:2px; background:var(--accent); margin-top:0.8rem; }
+
+.btn-upload {
+  display:inline-flex; align-items:center; gap:0.45rem;
+  padding:0.7rem 1.4rem;
+  background:var(--accent); color:var(--white);
+  font-family:'DM Sans',sans-serif; font-size:0.8rem;
+  font-weight:500; letter-spacing:0.1em; text-transform:uppercase;
+  text-decoration:none; border-radius:2px;
+  transition:background 0.18s;
+  white-space:nowrap;
+}
+.btn-upload:hover { background:var(--accent-dark); }
+.btn-upload svg { width:14px; height:14px; }
+
+/* ── Stat cards ── */
+.stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
+  margin-bottom:2.5rem; animation:fadeUp 0.5s 0.06s ease both;
+}
+.stat {
+  background:var(--white); border:1px solid var(--sand); padding:1.3rem 1.5rem;
+}
+.stat-label {
+  font-size:0.68rem; font-weight:500; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem;
+}
+.stat-value {
+  font-family:'Playfair Display',serif;
+  font-size:2rem; font-weight:700; color:var(--ink); line-height:1;
+}
+.stat-value.sm { font-size:1rem; line-height:1.4; padding-top:0.2rem; word-break:break-all; }
+.stat-sub { font-size:0.75rem; color:var(--muted); margin-top:0.3rem; }
+
+/* ── Section label ── */
+.section-label {
+  font-size:0.7rem; font-weight:500; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:1rem;
+  animation:fadeUp 0.5s 0.1s ease both;
+}
+
+/* ── Table ── */
+.doc-table-wrap { animation:fadeUp 0.5s 0.12s ease both; }
+
+table {
+  width:100%; border-collapse:collapse;
+  background:var(--white); border:1px solid var(--sand);
+}
+
+thead tr { border-bottom:1px solid var(--sand); }
+thead th {
+  text-align:left; padding:0.8rem 1.2rem;
+  font-size:0.68rem; font-weight:500; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--muted);
+  background:var(--cream);
+}
+
+tbody tr { border-bottom:1px solid var(--sand); transition:background 0.15s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:rgba(200,80,42,0.025); }
+
+td { padding:1rem 1.2rem; font-size:0.88rem; color:var(--ink); vertical-align:middle; }
+
+/* File cell */
+.file-cell { display:flex; align-items:center; gap:0.8rem; }
+.file-thumb {
+  width:38px; height:38px; flex-shrink:0;
+  background:var(--cream); border:1px solid var(--sand);
+  border-radius:2px;
+  display:flex; align-items:center; justify-content:center;
+}
+.file-thumb svg { width:16px; height:16px; stroke:var(--accent); }
+.file-name { font-weight:500; font-size:0.9rem; color:var(--ink); }
+.file-ext  { font-size:0.73rem; color:var(--muted); margin-top:0.1rem; }
+
+.td-muted { color:var(--muted); font-size:0.82rem; }
+
+/* Buttons */
+.action-wrap { display:flex; gap:0.5rem; align-items:center; }
+
+.btn-view {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  padding:0.35rem 0.85rem;
+  border:1px solid var(--sand); border-radius:2px;
+  font-family:'DM Sans',sans-serif; font-size:0.76rem; font-weight:500;
+  color:var(--accent); background:var(--accent-light);
+  text-decoration:none; transition:all 0.18s;
+}
+.btn-view:hover { border-color:var(--accent); background:rgba(200,80,42,0.14); }
+.btn-view svg { width:12px; height:12px; }
+
+.btn-del {
+  display:inline-flex; align-items:center;
+  padding:0.35rem 0.75rem;
+  border:1px solid var(--sand); border-radius:2px;
+  font-family:'DM Sans',sans-serif; font-size:0.76rem;
+  color:var(--muted); background:transparent; cursor:pointer;
+  transition:all 0.18s;
+}
+.btn-del:hover { border-color:var(--danger); color:var(--danger); background:rgba(184,64,64,0.06); }
+.btn-del svg { width:12px; height:12px; }
+
+/* Empty state */
+.empty {
+  text-align:center; padding:4rem 2rem;
+  background:var(--white); border:1px solid var(--sand);
+}
+.empty-icon {
+  width:52px; height:52px; margin:0 auto 1.2rem;
+  background:var(--cream); border:1px solid var(--sand);
+  border-radius:2px; display:flex; align-items:center; justify-content:center;
+}
+.empty-icon svg { width:22px; height:22px; stroke:var(--muted); }
+.empty h3 { font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:0.4rem; }
+.empty p  { color:var(--muted); font-size:0.86rem; margin-bottom:1.4rem; }
+
+@media(max-width:640px) {
+  .stats { grid-template-columns:1fr 1fr; }
+  thead th:nth-child(3), td:nth-child(3) { display:none; }
+  .page-top { flex-direction:column; align-items:flex-start; gap:1rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-top">
+  <div class="page-top-left">
+    <p class="page-eyebrow">Document Repository</p>
+    <h2>My <em>documents</em></h2>
+    <div class="page-line"></div>
+  </div>
+  <a href="{{ url_for('upload') }}" class="btn-upload">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Upload document
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Total files</div>
+    <div class="stat-value">{{ docs|length }}</div>
+    <div class="stat-sub">documents uploaded</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Account name</div>
+    <div class="stat-value sm">{{ session.first_name }}<br>{{ session.last_name }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Email</div>
+    <div class="stat-value sm">{{ session.email }}</div>
+  </div>
+</div>
+
+<!-- Documents -->
+<p class="section-label">Uploaded files</p>
+
+<div class="doc-table-wrap">
+{% if docs %}
+<table>
+  <thead>
+    <tr>
+      <th>File name</th>
+      <th>Uploaded</th>
+      <th>Size</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for doc in docs %}
+  <tr>
+    <td>
+      <div class="file-cell">
+        <div class="file-thumb">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <div class="file-name">{{ doc.filename }}</div>
+          <div class="file-ext">{{ doc.filename.rsplit('.',1)[-1].upper() if '.' in doc.filename else 'FILE' }}</div>
+        </div>
+      </div>
+    </td>
+    <td class="td-muted">{{ doc.uploaded_at[:10] }}</td>
+    <td class="td-muted">{{ doc.size_kb }} KB</td>
+    <td>
+      <div class="action-wrap">
+        <a href="{{ doc.url }}" target="_blank" class="btn-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          View
+        </a>
+        <form method="POST" action="{{ url_for('delete', doc_id=doc.id) }}"
+              onsubmit="return confirm('Delete {{ doc.filename }}?')">
+          <button type="submit" class="btn-del">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+<div class="empty">
+  <div class="empty-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+    </svg>
+  </div>
+  <h3>No documents yet</h3>
+  <p>Upload your first document to get started.</p>
+  <a href="{{ url_for('upload') }}" class="btn-upload" style="display:inline-flex">Upload your first document</a>
+</div>
+{% endif %}
+</div>
+{% endblock %}

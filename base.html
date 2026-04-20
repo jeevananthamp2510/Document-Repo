@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Document Repository{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:          #0f0e0d;
+  --cream:        #f7f4ef;
+  --sand:         #e8e2d9;
+  --sand-dark:    #d8d0c4;
+  --accent:       #c8502a;
+  --accent-dark:  #9e3b1c;
+  --accent-light: rgba(200,80,42,0.08);
+  --muted:        #7a7570;
+  --white:        #ffffff;
+  --success:      #4a7c59;
+  --danger:       #b84040;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(200,80,42,0.05) 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(200,80,42,0.04) 0%, transparent 55%);
+}
+
+/* ── Navbar ── */
+.navbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(247,244,239,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--sand);
+  padding: 0 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+
+.nav-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 700;
+  color: var(--ink); text-decoration: none;
+  display: flex; align-items: center; gap: 0.6rem;
+  letter-spacing: 0.01em;
+}
+
+.nav-brand-dot { color: var(--accent); }
+
+.brand-icon {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-icon svg { width: 16px; height: 16px; stroke: white; }
+
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+
+.nav-greeting {
+  font-size: 0.82rem; color: var(--muted);
+}
+.nav-greeting strong { color: var(--ink); font-weight: 500; }
+
+.nav-divider { width: 1px; height: 18px; background: var(--sand-dark); }
+
+.nav-link {
+  font-size: 0.8rem; font-weight: 500;
+  color: var(--muted); text-decoration: none;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--sand);
+  border-radius: 2px;
+  transition: all 0.18s;
+  background: var(--white);
+}
+.nav-link:hover { border-color: var(--accent); color: var(--accent); }
+
+.nav-link.primary {
+  background: var(--accent); color: var(--white);
+  border-color: var(--accent);
+}
+.nav-link.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: var(--white); }
+
+/* ── Main ── */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* ── Flash messages ── */
+.flash-wrap { margin-bottom: 1.5rem; }
+.flash {
+  padding: 0.8rem 1.1rem;
+  border-left: 3px solid;
+  font-size: 0.86rem;
+  margin-bottom: 0.5rem;
+  animation: fadeUp 0.3s ease;
+}
+.flash.error   { background: rgba(184,64,64,0.07);  border-color: var(--danger);  color: #8b2020; }
+.flash.success { background: rgba(74,124,89,0.08);  border-color: var(--success); color: #2e5c3a; }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if session.user_id %}
+<nav class="navbar">
+  <a href="{{ url_for('dashboard') }}" class="nav-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+    </div>
+    Document<span class="nav-brand-dot"> Repository</span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-greeting">Hello, <strong>{{ session.first_name }} {{ session.last_name }}</strong></span>
+    <div class="nav-divider"></div>
+    <a href="{{ url_for('upload') }}" class="nav-link primary">+ Upload</a>
+    <a href="{{ url_for('logout') }}" class="nav-link">Sign out</a>
+  </div>
+</nav>
+{% endif %}
+
+<main class="main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

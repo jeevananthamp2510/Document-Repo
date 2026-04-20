@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% block title %}Upload — Document Repository{% endblock %}
+
+{% block extra_head %}
+<style>
+.upload-wrap { max-width:560px; margin:0 auto; animation:fadeUp 0.5s ease both; }
+
+.page-header { margin-bottom:2.2rem; }
+.page-eyebrow {
+  font-size:0.7rem; font-weight:500; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:0.5rem;
+}
+.page-header h2 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.8rem,4vw,2.5rem); font-weight:700; color:var(--ink);
+}
+.page-header h2 em { font-style:italic; color:var(--accent); }
+.page-line { width:36px; height:2px; background:var(--accent); margin-top:0.8rem; }
+
+/* Card */
+.upload-card {
+  background:var(--white); border:1px solid var(--sand);
+  padding:2.2rem; position:relative; overflow:hidden;
+}
+.upload-card::before {
+  content:''; position:absolute; top:0; left:0; right:0;
+  height:3px; background:linear-gradient(90deg,var(--accent),#d97048);
+}
+
+/* Drop zone */
+.drop-zone {
+  border:1.5px dashed var(--sand-dark); border-radius:2px;
+  padding:3rem 2rem; text-align:center;
+  cursor:pointer; position:relative;
+  background:var(--cream); transition:all 0.2s;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color:var(--accent);
+  background:rgba(200,80,42,0.04);
+}
+.drop-zone input[type="file"] {
+  position:absolute; inset:0; opacity:0;
+  cursor:pointer; width:100%; height:100%;
+}
+
+.drop-icon {
+  width:52px; height:52px; margin:0 auto 1rem;
+  background:var(--white); border:1px solid var(--sand);
+  border-radius:2px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.drop-zone:hover .drop-icon, .drop-zone.drag-over .drop-icon {
+  border-color:var(--accent); background:rgba(200,80,42,0.06);
+}
+.drop-icon svg { width:22px; height:22px; stroke:var(--muted); transition:stroke 0.2s; }
+.drop-zone:hover .drop-icon svg { stroke:var(--accent); }
+
+.drop-title { font-size:0.95rem; font-weight:500; color:var(--ink); margin-bottom:0.3rem; }
+.drop-title span { color:var(--accent); }
+.drop-hint  { font-size:0.78rem; color:var(--muted); }
+
+/* Preview bar */
+#preview {
+  margin-top:1.2rem; padding:0.85rem 1rem;
+  background:var(--cream); border:1px solid var(--sand);
+  display:none; align-items:center; gap:0.75rem;
+}
+.prev-icon {
+  width:36px; height:36px; flex-shrink:0;
+  background:rgba(200,80,42,0.08); border:1px solid rgba(200,80,42,0.2);
+  border-radius:2px; display:flex; align-items:center; justify-content:center;
+}
+.prev-icon svg { width:16px; height:16px; stroke:var(--accent); }
+#preview-name { font-size:0.88rem; font-weight:500; color:var(--ink); }
+#preview-size { font-size:0.75rem; color:var(--muted); }
+
+/* Submit */
+.btn-submit {
+  width:100%; padding:0.9rem;
+  background:var(--accent); color:var(--white);
+  font-family:'DM Sans',sans-serif; font-size:0.82rem;
+  font-weight:500; letter-spacing:0.12em; text-transform:uppercase;
+  border:none; border-radius:2px; cursor:pointer;
+  transition:background 0.18s, transform 0.1s; margin-top:1.3rem;
+}
+.btn-submit:hover  { background:var(--accent-dark); }
+.btn-submit:active { transform:scale(0.99); }
+
+.btn-back {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  margin-top:1.2rem; font-size:0.82rem; color:var(--muted);
+  text-decoration:none; transition:color 0.18s;
+}
+.btn-back:hover { color:var(--accent); }
+.btn-back svg { width:14px; height:14px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-wrap">
+  <div class="page-header">
+    <p class="page-eyebrow">Document Repository</p>
+    <h2>Upload a <em>document</em></h2>
+    <div class="page-line"></div>
+  </div>
+
+  <div class="upload-card">
+    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" name="document" id="fileInput" required>
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <p class="drop-title"><span>Click to choose</span> or drag &amp; drop</p>
+        <p class="drop-hint">PDF, Word, images, or any file · max 50 MB</p>
+      </div>
+
+      <div id="preview">
+        <div class="prev-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div>
+          <div id="preview-name"></div>
+          <div id="preview-size"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Upload to repository</button>
+    </form>
+
+    <a href="{{ url_for('dashboard') }}" class="btn-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back to dashboard
+    </a>
+  </div>
+</div>
+
+<script>
+const input = document.getElementById('fileInput');
+const zone  = document.getElementById('dropZone');
+const prev  = document.getElementById('preview');
+const pname = document.getElementById('preview-name');
+const psize = document.getElementById('preview-size');
+
+function show(file) {
+  pname.textContent = file.name;
+  psize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+  prev.style.display = 'flex';
+}
+
+input.addEventListener('change', () => { if (input.files[0]) show(input.files[0]); });
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) { input.files = e.dataTransfer.files; show(f); }
+});
+</script>
+{% endblock %}

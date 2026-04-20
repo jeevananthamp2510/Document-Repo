@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Sign In — Document Repository{% endblock %}
+
+{% block extra_head %}
+<style>
+body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
+
+.auth-outer { width:100%; max-width:420px; animation: fadeUp 0.55s ease both; }
+
+/* Header above card */
+.auth-header { margin-bottom:2.2rem; }
+
+.auth-label {
+  font-size: 0.7rem; font-weight:500;
+  letter-spacing:0.2em; text-transform:uppercase;
+  color: var(--accent); margin-bottom:0.5rem;
+}
+
+.auth-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem,5vw,2.8rem);
+  font-weight:700; line-height:1.1; color:var(--ink);
+}
+.auth-header h1 em { font-style:italic; color:var(--accent); }
+
+.auth-line { width:40px; height:2px; background:var(--accent); margin-top:0.9rem; }
+
+/* Card */
+.auth-card {
+  background: var(--white);
+  border: 1px solid var(--sand);
+  padding: 2.2rem;
+  position: relative; overflow:hidden;
+}
+.auth-card::before {
+  content:''; position:absolute; top:0; left:0; right:0;
+  height:3px; background: linear-gradient(90deg, var(--accent), #d97048);
+}
+
+/* Fields */
+.field { margin-bottom:1.3rem; }
+.field label {
+  display:block; font-size:0.72rem; font-weight:500;
+  letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:0.45rem;
+}
+.field input {
+  width:100%; padding:0.8rem 1rem;
+  border:1px solid var(--sand); border-radius:2px;
+  font-family:'DM Sans',sans-serif; font-size:0.95rem;
+  color:var(--ink); background:var(--cream);
+  outline:none; transition: border-color 0.18s, box-shadow 0.18s;
+}
+.field input:focus {
+  border-color:var(--accent); background:var(--white);
+  box-shadow: 0 0 0 3px rgba(200,80,42,0.1);
+}
+.field input::placeholder { color:#c0bab3; }
+
+.btn-submit {
+  width:100%; padding:0.9rem;
+  background:var(--accent); color:var(--white);
+  font-family:'DM Sans',sans-serif; font-size:0.82rem;
+  font-weight:500; letter-spacing:0.12em; text-transform:uppercase;
+  border:none; border-radius:2px; cursor:pointer;
+  transition: background 0.18s, transform 0.1s;
+  margin-top:0.3rem;
+}
+.btn-submit:hover  { background:var(--accent-dark); }
+.btn-submit:active { transform:scale(0.99); }
+
+.auth-foot {
+  text-align:center; margin-top:1.4rem;
+  font-size:0.83rem; color:var(--muted);
+}
+.auth-foot a { color:var(--accent); text-decoration:none; font-weight:500; }
+.auth-foot a:hover { text-decoration:underline; }
+
+.divider {
+  display:flex; align-items:center; gap:0.75rem;
+  margin:1.3rem 0; color:var(--muted); font-size:0.75rem;
+}
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--sand); }
+
+.flash { border-radius:2px; margin-bottom:1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-outer">
+  <div class="auth-header">
+    <p class="auth-label">Document Repository</p>
+    <h1>Welcome <em>back</em></h1>
+    <div class="auth-line"></div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <div class="auth-card">
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-submit">Sign in</button>
+    </form>
+
+    <div class="divider">or</div>
+    <div class="auth-foot" style="margin-top:0">
+      New here? <a href="{{ url_for('signup') }}">Create an account</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
