@@ -146,11 +146,9 @@ File View Flow:
 Coding:
 1. Generate Secret Key (Run First)
    python3 -c "import secrets; print(secrets.token_hex(32))"
-# Copy the output — it will look like:
-# a3f8c2d1e9b4f7a2c6d3e8b1f4a7c2d9e6b3f8a1c4d7e2b9f6a3c8d1e4b7f2a9
-# Use this value as your SECRET_KEY in all configurations below
-2. app.py file creation using touch or nano Linux command
-3. Gunicorn systemd Service
+   Copy the output and use this value as your SECRET_KEY in all configurations below
+3. app.py file creation using touch or nano Linux command
+4. Gunicorn systemd Service
    [Unit]
 Description=Document Repository Flask App
 After=network.target
